@@ -1,0 +1,55 @@
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+
+# Node / Vercel
+node_modules/
+dist/
+.vercel/
+.next/
+.env
+.env.local
+.env.*.local
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# iOS / Xcode
+build/
+DerivedData/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.xcuserstate
+*.xcworkspace/xcshareddata/SwiftPM/Package.resolved
+*.xcworkspace/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcshareddata/xcschemes/
+*.xcodeproj/xcuserdata/
+Bundle/
+
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+
+# Antigravity / Agent Specifics
+# (We generally commit these, but you can ignore temporary logs if needed)
+.antigravity/logs/
