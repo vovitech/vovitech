@@ -4,8 +4,10 @@
   "private": true,
   "description": "Spec-Driven Development workspace for iOS + Vercel",
   "scripts": {
-    "test:all": "echo \"Error: no global tests specified\" && exit 1",
-    "lint:all": "echo \"Error: no global linting specified\" && exit 1"
+    "test:all": "npm run test --prefix web && echo \"Error: no global tests specified\" && exit 1",
+    "lint:all": "npm run lint --prefix web && echo \"Error: no global linting specified\" && exit 1",
+    "web:dev": "npm run dev --prefix web",
+    "web:build": "npm run build --prefix web"
   },
   "devDependencies": {
     "prettier": "^3.0.0"
