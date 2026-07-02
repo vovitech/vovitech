@@ -47,7 +47,7 @@ Reviewers routinely deny the first permission prompt and check the app doesn't d
 The policy must accurately describe the two-tier model. Minimum contents, each checkable against the settled specs:
 
 - [ ] **What is collected, in two tiers, stated plainly:**
-  - *Always:* derived data from each analyzed photo — detected food labels, portion estimate, calorie range + confidence, the selected goal, the reaction text, a timestamp — keyed to the user's account (data-model §2.1). Stated explicitly that this is kept **even when the photo is not**.
+  - *Always:* derived data from each analyzed photo — detected food labels, a one-line description, the selected goal, the reaction text, a timestamp — keyed to the user's account (data-model §2.1). No calorie or portion figures are computed or stored (removed from the contract; feedback-api §4). Stated explicitly that this derived data is kept **even when the photo is not**.
   - *Opt-in only:* the food photo itself, kept **90 days** then automatically deleted (data-model §5). Off by default; the toggle is on the camera screen.
   - *Account:* authentication identity via Clerk (Apple or Google sign-in). No email, name, or profile data is stored in our own database (data-model §4).
 - [ ] **What is never collected:** photo location/EXIF (stripped on-device by construction, ios-client §3); photos the user did not opt to store are processed to produce the feedback and not retained; non-food photos store nothing at all (feedback-api §2.2).
@@ -66,7 +66,7 @@ The policy must accurately describe the two-tier model. Minimum contents, each c
 
 ## 4. Privacy nutrition label — App Store Connect declarations
 
-Declared in App Store Connect under App Privacy. Governing decision: **the label declares the derived data, not just the opt-in photo.** Per data-model §2.1, derived rows (labels, portion, kcal range, goal, reaction, timestamp) are personal data keyed to a Clerk user id and kept indefinitely — a label that only mentioned photos would be dishonest and, worse for review, inconsistent with our own privacy policy.
+Declared in App Store Connect under App Privacy. Governing decision: **the label declares the derived data, not just the opt-in photo.** Per data-model §2.1, derived rows (labels, description, goal, reaction, timestamp) are personal data keyed to a Clerk user id and kept indefinitely — a label that only mentioned photos would be dishonest and, worse for review, inconsistent with our own privacy policy.
 
 - [ ] **"Data Used to Track You": none.** No ATT prompt, no tracking SDKs, no ad frameworks. (v1 has zero analytics/telemetry — ios-client §9, data-model §6. Adding any analytics SDK later reopens this section.)
 - [ ] **"Data Linked to You"** — everything below is linked (keyed to the Clerk user id); nothing qualifies as "not linked":
@@ -74,7 +74,7 @@ Declared in App Store Connect under App Privacy. Governing decision: **the label
 | Apple category → type | What it actually is | Collected? | Purposes | Notes |
 |---|---|---|---|---|
 | Photos or Videos | The food photo | Yes | App Functionality; Analytics (product/model improvement) | Optional (opt-in toggle); retained 90 days. Declared even though opt-out photos are transient — the opt-in path stores them, and the label describes the app's practices, not one request. |
-| Health & Fitness → Health | Selected goal (e.g. *lose weight*) + calorie/portion estimates | Yes | App Functionality; Analytics | The conservative, honest call: diet goals and kcal data keyed to identity are health data. Mislabeling health data is a high-severity rejection. |
+| Health & Fitness → Health | Selected goal (e.g. *lose weight*) | Yes | App Functionality; Analytics | The conservative, honest call: a diet/fitness goal keyed to identity is health data even without any calorie figures (those were removed — feedback-api §4). Mislabeling health data is a high-severity rejection, so we keep declaring the goal here. |
 | Identifiers → User ID | Clerk user id | Yes | App Functionality | Keys every row (data-model §2). |
 | Contact Info → Email Address, Name | Sign-in identity held by Clerk | Yes | App Functionality | Collected by our auth processor even though our DB stores neither (data-model §4). "Collected by the developer or their processors" — Clerk is our processor, so it's declared. |
 | Other Data | Reaction text, food labels, timestamp | Yes | App Functionality; Analytics | The rest of the derived record. |
@@ -126,7 +126,7 @@ The sequence is idempotent (data-model §4) — a partial failure is safely re-r
 
 The risk: a reviewer sees "camera app that calls an API" and rejects as a thin wrapper. The defense is that the AI reaction *is* the product (mvp.md §"What it is") and the app demonstrates judgment, not just capture.
 
-- [ ] The core loop works on a physical device with a real photo at submission time: sign in → goal → photo → goal-voiced reaction with calorie range. A broken model call during review is an automatic 2.1 rejection regardless of 4.2.
+- [ ] The core loop works on a physical device with a real photo at submission time: sign in → goal → photo → goal-voiced reaction. A broken model call during review is an automatic 2.1 rejection regardless of 4.2.
 - [ ] The four goals produce **visibly different** reactions to the same plate (the voice blocks, feedback-api §4.3) — this is the concrete evidence the app does something beyond captioning.
 - [ ] The non-food redirect works gracefully: a reviewer at a desk will photograph a keyboard or a wall first. The in-band redirect ("That's a keyboard — point me at your plate", feedback-api §2.2) turns the most likely first review interaction into a feature demo instead of an error.
 - [ ] **App Review notes** (App Store Connect) written to preempt the wrapper reading, stating: the app provides AI-generated, goal-conditioned feedback on food photos; any Apple ID works via Sign in with Apple (no demo credentials needed — satisfies Guideline 2.1 for login-gated apps); photograph any food, or any object to see the non-food handling; the photo-storage toggle is off by default and the app is fully functional without it.

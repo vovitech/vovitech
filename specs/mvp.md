@@ -55,7 +55,7 @@ Four is enough. Goals can be renamed or extended later without touching the arch
 
 Storage is deliberately split so product improvement never depends on hoarding sensitive images:
 
-- **Always kept (low-risk):** derived, non-sensitive data — detected food labels, portion/calorie estimate, the selected goal, the reaction text, a timestamp. This is what powers product improvement.
+- **Always kept (low-risk):** derived, non-sensitive data — detected food labels, a one-line description, the selected goal, the reaction text, a timestamp. This is what powers product improvement. (No calorie or portion figures — cut as false precision and health-claim risk; the reaction says *what* the food is, which is enough to be useful.)
 - **Kept only on opt-in (sensitive):** the raw photo, on a fixed retention window (target 30–90 days), used to improve the model/prompts. Off by default or clearly disclosed; never "forever."
 
 Rationale: food photos capture faces, kitchens, and bystanders. Keeping only derived data by default makes the privacy story genuinely strong rather than merely compliant, and it's cheap to do now versus expensive to retrofit.

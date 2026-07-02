@@ -25,7 +25,7 @@ Decisions locked in discussion (2026-07-02):
 
 1. **Image bytes go to the route**, not to UploadThing first. Opted-out photos never touch third-party storage — this is what makes the two-tier privacy story real. Client compresses to JPEG ≤ 2 MB (Vercel body limit is ~4.5 MB; server hard-rejects > 4 MB).
 2. **Non-food photos are an in-band 200**, not an error. The model can nearly always say something graceful; errors are reserved for transport and model failures.
-3. **Calories are a range + confidence**, never a single number. A photo cannot justify false precision.
+3. **No calorie or portion numbers.** The reaction names *what* the food is and reacts to it; numeric estimates from a single photo are false precision and stray into health-claim risk, so they are out of scope for v1. The model may reference portion or richness qualitatively *in the reaction prose* ("that's a big plate"), but there is no structured calorie/portion/confidence field.
 
 ## 2. Endpoint: `POST /api/feedback`
 
@@ -47,11 +47,9 @@ Decisions locked in discussion (2026-07-02):
 {
   "id": "fb_01J...",              // server id of the derived record (record shape in data-model spec)
   "is_food": true,
-  "reaction": "Solid protein on that plate — the fries are doing most of the calorie work, though.",
+  "reaction": "Solid protein on that plate — the fries are doing most of the heavy lifting, though.",
   "what_this_is": "Grilled chicken with fries and a side salad",
   "labels": ["grilled chicken", "french fries", "side salad"],
-  "portion": "One standard restaurant plate, ~single serving",
-  "calories": { "kcal_min": 550, "kcal_max": 750, "confidence": "medium" },
   "photo_stored": false            // true only if store_photo was true AND upload succeeded
 }
 ```
@@ -61,10 +59,9 @@ Field rules the client may rely on:
 - `reaction`: always present, 1–3 sentences, ≤ 280 chars, voiced per goal (§4).
 - `what_this_is`: always present when `is_food` is true; one line, no trailing period style opinions — plain description.
 - `labels`: 1–6 lowercase food names when `is_food` is true; `[]` otherwise.
-- `calories.confidence`: `low` | `medium` | `high`. Client renders the range (e.g. "550–750 cal"); may de-emphasize when `low`.
 - The response contains **everything the server derived and stored** — the client never needs a follow-up fetch, and the user sees exactly what was kept.
 
-**Non-food variant** (`is_food: false`): `reaction` is a graceful redirect ("That's a keyboard — point me at your plate"), `what_this_is` describes what it saw, `labels` is `[]`, `portion` and `calories` are `null`, no derived record is stored, no photo is uploaded regardless of opt-in, and `id` is `null`.
+**Non-food variant** (`is_food: false`): `reaction` is a graceful redirect ("That's a keyboard — point me at your plate"), `what_this_is` describes what it saw, `labels` is `[]`, no derived record is stored, no photo is uploaded regardless of opt-in, and `id` is `null`.
 
 ### 2.3 Errors
 
@@ -115,10 +112,6 @@ The model must return exactly this object; it is a superset feeding both the API
   "is_food": true,
   "what_this_is": "string, one line",
   "labels": ["1–6 lowercase food names; [] if not food"],
-  "portion": "string | null — human-readable portion estimate",
-  "kcal_min": 550,                  // integer | null
-  "kcal_max": 750,                  // integer | null, >= kcal_min
-  "confidence": "low|medium|high",  // applies to portion + calories
   "reaction": "string, 1–3 sentences, <= 280 chars, in the goal's voice"
 }
 ```
@@ -138,7 +131,7 @@ Renaming or adding a goal = adding a voice block + enum value; no other change (
 
 ### 4.4 Validation & repair
 
-Server validates model output against the schema (including cross-field rules: `kcal_max ≥ kcal_min`; `labels` empty iff `is_food` false; nulls only when not food). On failure: **one** repair retry (re-prompt with the validation error appended). Second failure → `502 model_failure`. The client never receives unvalidated model output.
+Server validates model output against the schema (including cross-field rules: `labels` non-empty iff `is_food` true; `what_this_is` present iff `is_food` true). On failure: **one** repair retry (re-prompt with the validation error appended). Second failure → `502 model_failure`. The client never receives unvalidated model output.
 
 ### 4.5 Safety & tone rules (in the shared system prompt)
 
@@ -151,7 +144,7 @@ Server validates model output against the schema (including cross-field rules: `
 
 | Case | Contract |
 |---|---|
-| Blurry / dark but plausibly food | `is_food: true`, `confidence: "low"`, reaction may ask for a better shot |
+| Blurry / dark but plausibly food | `is_food: true`, reaction acknowledges the poor image and may ask for a better shot |
 | Multiple dishes in frame | Labels list them; reaction addresses the plate as a whole, anchored on the goal-relevant item |
 | Packaged food, menus, drinks | Count as food (`is_food: true`) if it's an edible/drinkable product; menus are `is_food: false` with a redirect |
 | Empty plate / wrappers | `is_food: false`, graceful redirect |
@@ -162,7 +155,7 @@ Data-model tables (derived-record and photo-reference shapes → data-model spec
 
 ## 6. Open questions
 
-1. **Default model/provider** for the adapter (needs a quick eval on food photos: label accuracy, kcal sanity, latency under the 20 s budget).
+1. **Default model/provider** for the adapter (needs a quick eval on food photos: label accuracy, reaction/voice quality, latency under the 20 s budget).
 2. **Rate limit** value for `429` (protects the model bill; propose per-user 20/hour to start).
 3. Whether HEIC is transcoded client-side (recommended) or accepted server-side.
 

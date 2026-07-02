@@ -86,7 +86,7 @@ Single endpoint, `URLSession`, async/await, multipart body per API spec §2.1 (`
 
 ### 5.1 Response decoding
 
-Decode the §2.2 shape. Client-binding rules: `reaction` always present; `calories` and `portion` nullable (non-food); `confidence` drives de-emphasis (§7). Unknown fields ignored (forward-compatible decoding). A 200 that fails to decode is treated as `model_failure` UI (should be impossible — server schema-validates — but the client never crashes on a body).
+Decode the §2.2 shape. Client-binding rules: `reaction` always present; `is_food` distinguishes the food vs redirect rendering (§7); `what_this_is` and `labels` present when `is_food` is true. Unknown fields ignored (forward-compatible decoding). A 200 that fails to decode is treated as `model_failure` UI (should be impossible — server schema-validates — but the client never crashes on a body).
 
 ### 5.2 Error map (API spec §2.3, complete)
 
@@ -130,9 +130,8 @@ Cancel aborts the `URLSessionTask` and returns to Camera. The server may still c
 
 - **Reaction is the hero:** large type, top of screen. It is the product. Rendered with a Dynamic Type text style (not a fixed point size) so it scales with the user's setting; the layout uses a `ScrollView` fallback so the largest accessibility sizes never clip the reaction off-screen.
 - Below: `what_this_is` as a one-line caption.
-- **Calories:** rendered as a range — "550–750 cal" — with a confidence tag. `confidence == "low"` de-emphasizes the block (smaller, secondary color) per API spec §2.2. Never a single number.
-- `labels` and `portion` are **not rendered** in v1 — derived data, not product surface.
-- **Non-food (`is_food: false`):** same screen; the reaction (a graceful redirect, e.g. "That's a keyboard — point me at your plate") + `what_this_is`; no calorie block. Not styled as an error.
+- `labels` are **not rendered** in v1 — derived data, not product surface. There are no calorie, portion, or confidence numbers to render (removed from the contract; see feedback-api §4).
+- **Non-food (`is_food: false`):** same screen; the reaction (a graceful redirect, e.g. "That's a keyboard — point me at your plate") + `what_this_is`. Not styled as an error.
 - Single CTA: "Another photo" → Camera. No share, no save, no history entry.
 
 ## 8. Architecture & standards

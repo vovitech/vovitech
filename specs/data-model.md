@@ -39,14 +39,10 @@ One row per **successful food analysis**. Written on every request where the mod
 | `goal` | `goal` enum | NOT NULL | §3 |
 | `what_this_is` | `text` | NOT NULL | One-line description from the model |
 | `labels` | `jsonb` | NOT NULL | Array of 1–6 lowercase food-name strings |
-| `portion` | `text` | NOT NULL | Human-readable portion estimate |
-| `kcal_min` | `integer` | NOT NULL | |
-| `kcal_max` | `integer` | NOT NULL, CHECK `kcal_max >= kcal_min` | Mirrors the API's cross-field rule |
-| `confidence` | `confidence` enum | NOT NULL | `low` \| `medium` \| `high` |
 | `reaction` | `text` | NOT NULL | The reaction text as shown to the user |
 | `created_at` | `timestamptz` | NOT NULL, default `now()` | The API's timestamp |
 
-`portion`, `kcal_min`, `kcal_max` are NOT NULL deliberately: the API spec's validation rules allow nulls only when `is_food` is false, and non-food results never produce a row. If the model can't estimate, it still returns a wide range at `confidence: "low"` — the schema does not admit "food but no estimate."
+There are no calorie, portion, or confidence columns: v1 stores only *what* the food is (`labels`, `what_this_is`) and the reaction, per feedback-api §4 — numeric estimates were cut as false precision and health-claim risk. Portion/richness, when relevant, live inside the `reaction` prose, not a column.
 
 **Index:** `(clerk_user_id, created_at)` — serves per-user deletion (§4) now and history views (deferred, not rejected in the MVP) later without a migration.
 
@@ -92,7 +88,6 @@ CREATE TYPE goal AS ENUM ('lose_weight', 'less_sugar', 'build_muscle', 'eat_mind
 
 Adding a goal later = `ALTER TYPE goal ADD VALUE ...` + a voice block + the API enum — consistent with the MVP's promise that goals extend without architectural change. The DB enum and the API enum are the same list by definition; the route validates against the API enum before any write, so `invalid_goal` can never reach the database.
 
-`confidence` is likewise a native enum (`low`, `medium`, `high`).
 
 ## 4. Clerk tie-in and user deletion
 
