@@ -1,15 +1,18 @@
 {
-  "name": "vovitech-monorepo",
+  "name": "vovitech-web",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Spec-Driven Development workspace for iOS + Vercel",
   "scripts": {
-    "test:all": "npm run test --prefix web && echo \"Error: no global tests specified\" && exit 1",
-    "lint:all": "npm run lint --prefix web && echo \"Error: no global linting specified\" && exit 1",
-    "web:dev": "npm run dev --prefix web",
-    "web:build": "npm run build --prefix web"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "web:dev": "vite",
+    "web:build": "vite build"
   },
   "devDependencies": {
-    "prettier": "^3.0.0"
+    "prettier": "^3.0.0",
+    "vite": "^6.0.0"
   }
 }
