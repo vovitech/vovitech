@@ -34,7 +34,7 @@ Five screens; navigation is a single state machine, not a stack the user can wan
 - **Loading:** the captured photo frozen full-screen with a progress overlay (§6.1).
 - **Result:** the reaction (§7). One CTA: "Another photo" → Camera.
 
-Signed-out at any point (session revoked, sign-out) → Auth. There is no settings screen, no history, no tab bar in v1.
+Signed-out at any point (session revoked, sign-out) → Auth. The only chrome beyond the loop is a minimal **Account menu** reached from the Camera screen (icon in a corner), holding sign-out and **Delete account** — the latter is an App Store requirement (Guideline 5.1.1(v)) for any app offering account creation, and it triggers Clerk account deletion, which fires the `user.deleted` webhook that purges the user's data (data-model §4). No history, no tab bar, no other settings in v1. See `specs/app-store-compliance.md`.
 
 ## 2. Camera permission states
 
@@ -160,7 +160,7 @@ The only third-party dependency (Swift Package). Provides Sign in with Apple (na
 
 ## 9. What this spec deliberately excludes
 
-Clerk integration internals (sign-in flows, token storage, session lifecycle → auth spec), server behavior (feedback-api spec), persistence schema (data-model spec), App Store submission assets (privacy nutrition label contents, screenshots), analytics/telemetry (none in v1), and iPad/landscape layouts (iPhone portrait only in v1).
+Clerk integration internals (sign-in flows, token storage, session lifecycle → auth spec), server behavior (feedback-api spec), persistence schema (data-model spec), App Store submission assets and the compliance surface — privacy nutrition label contents, screenshots, the privacy-policy link, and the exact Account-menu / delete-account copy and flow (→ `specs/app-store-compliance.md`; this spec only notes that the Account entry point exists per §1), analytics/telemetry (none in v1), and iPad/landscape layouts (iPhone portrait only in v1).
 
 ## 10. Decisions & open questions
 
