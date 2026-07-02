@@ -52,7 +52,7 @@ The policy must accurately describe the two-tier model. Minimum contents, each c
   - *Account:* authentication identity via Clerk (Apple or Google sign-in). No email, name, or profile data is stored in our own database (data-model §4).
 - [ ] **What is never collected:** photo location/EXIF (stripped on-device by construction, ios-client §3); photos the user did not opt to store are processed to produce the feedback and not retained; non-food photos store nothing at all (feedback-api §2.2).
 - [ ] **Purposes:** derived data → provide the feedback and improve the product; opt-in photos → improve the model/prompts. No advertising, no sale of data, no tracking.
-- [ ] **Processors/third parties, named:** Clerk (authentication), Vercel (API hosting), Neon (database), UploadThing (opt-in photo storage), and the AI model provider. ⚠️ The provider is an open question in feedback-api §6.1 — **the policy cannot ship with a blank; naming the chosen provider is a dependency of submission.**
+- [ ] **Processors/third parties, named:** Clerk (authentication), Vercel (API hosting), Neon (database), UploadThing (opt-in photo storage), and **Anthropic (AI model provider — Claude Sonnet 5)** for food-photo analysis and reaction generation (feedback-api §4.1). Note in the policy that Anthropic does not train on API inputs by default. ✅ Provider resolved — this is no longer a submission blocker.
 - [ ] **Retention:** photos 90 days; derived data until account deletion.
 - [ ] **Deletion rights and how:** delete your account in-app (§5.1) → everything is deleted (data-model §4); or request deletion of your data without closing the account via the support contact (§5.2), fulfilled within 30 days.
 - [ ] **Contact:** a monitored email address for privacy requests.
@@ -145,4 +145,4 @@ Auth-spec internals (Clerk session mechanics), the marketing copy itself, App St
 
 ## 9. Done when
 
-Every checkbox above is checked against the built app, the live privacy-policy URL, and the App Store Connect submission — by someone actually toggling, denying, deleting, and reading, not by code review. The three artifacts that must agree — the app's behavior, the privacy policy, and the nutrition label — have been cross-checked as a set. The submission is blocked on exactly one named dependency: the AI provider is chosen and named in the privacy policy (§3.1).
+Every checkbox above is checked against the built app, the live privacy-policy URL, and the App Store Connect submission — by someone actually toggling, denying, deleting, and reading, not by code review. The three artifacts that must agree — the app's behavior, the privacy policy, and the nutrition label — have been cross-checked as a set. The former sole hard dependency — naming the AI provider — is **resolved**: Anthropic (Claude Sonnet 5) is the provider and is named in the privacy policy (§3.1). No named submission blockers remain.

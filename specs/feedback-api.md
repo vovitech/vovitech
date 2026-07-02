@@ -99,9 +99,9 @@ UploadThing upload (when opted in) happens **after** the model call succeeds and
 
 ### 4.1 Model & call shape
 
-One vision-capable model call per request, behind a thin provider adapter (`generateFeedback(imageBytes, goal): ModelOutput`) so the provider can be swapped without touching the route. Default provider is an open question (§6); the contract below is provider-agnostic.
+One vision-capable model call per request, behind a thin provider adapter (`generateFeedback(imageBytes, goal): ModelOutput`) so the provider can be swapped without touching the route. **Default provider: Anthropic Claude Sonnet 5 (`claude-sonnet-5`)** — chosen for instruction-following and tone quality, since the goal-voiced reaction is the product; latency sits inside the 20 s budget, and the Anthropic API does not train on inputs by default (relevant to the opt-in photo path). The adapter keeps this swappable (e.g. A/B a cheaper tier like Haiku for cost) without touching the route. The contract below remains provider-agnostic.
 
-Structured output is **schema-enforced** (tool-use / structured-outputs mode), never "please return JSON" prose.
+Structured output is **schema-enforced** — with Claude this is **tool-use mode** (a single tool whose input schema is the §4.2 object), never "please return JSON" prose.
 
 ### 4.2 Model output schema
 
@@ -155,7 +155,7 @@ Data-model tables (derived-record and photo-reference shapes → data-model spec
 
 ## 6. Open questions
 
-1. **Default model/provider** for the adapter (needs a quick eval on food photos: label accuracy, reaction/voice quality, latency under the 20 s budget).
+1. ~~**Default model/provider** for the adapter.~~ **Resolved: Anthropic Claude Sonnet 5** (§4.1). A quick eval on real food photos (label accuracy, reaction/voice quality, latency under the 20 s budget) is still worth running to confirm before launch, and to baseline a cheaper tier for later.
 2. **Rate limit** value for `429` (protects the model bill; propose per-user 20/hour to start).
 3. Whether HEIC is transcoded client-side (recommended) or accepted server-side.
 
